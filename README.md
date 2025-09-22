@@ -1,36 +1,21 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tech Grad Product Engineering Task
 
-## Getting Started
+The Senior Leadership Team (SLT) are worried that our conversion of vehicle purchases isn't where it needs to be. After speaking with DACRO (Data Analytics) and UX (User Experience), they think the problem stems from the fact that it is difficult for customers to find the vehicle they want.​
 
-First, run the development server:
+## Discovery & Ideation
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+Let's dissect the problem, investigate how the website looks and functions currently. We'll also take a look at what information is available to us in order to help solve the problem. The last part of this step will be spent brainstorming ideas off the back of what we've discovered.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Tools of choice: Browser, Swagger, Miro
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Planning
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Now we have some ideas, it's time to plan out how we might approach these changes before going into development. This is a great time to break down our ideas and form options that we would put back to the business (SLT). I.e. A scalable approach, the fastest approach, the highest quality approach etc.
 
-## Learn More
+Tools of choice: Miro
 
-To learn more about Next.js, take a look at the following resources:
+## Development
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Time to get into the code. Our ideas are solid and we have a plan that the business have agreed to. Let's get into the code and make it a reality.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Tools of choice: Browser, VS Code, Github

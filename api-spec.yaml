@@ -1,0 +1,520 @@
+openapi: 3.0.3
+info:
+  title: Cinch Vehicle Search API
+  description: API for searching and retrieving vehicle listings from Cinch
+  version: 1.0.0
+  contact:
+    name: Cinch Tech Team
+    url: https://cinch.co.uk
+servers:
+  - url: https://search-api.snc-prod.aws.cinch.co.uk
+    description: Production server
+
+paths:
+  /vehicles:
+    get:
+      summary: Search for vehicles
+      description: Retrieve a paginated list of vehicles with optional filtering
+      operationId: searchVehicles
+      parameters:
+        - name: pageNumber
+          in: query
+          description: Page number for pagination (1-based)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+            example: 1
+        - name: pageSize
+          in: query
+          description: Number of vehicles per page
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 32
+            example: 32
+        - name: make
+          in: query
+          description: Filter vehicles by manufacturer/make
+          required: false
+          schema:
+            type: string
+            example: BMW
+            enum:
+              - Abarth
+              - Alfa Romeo
+              - Audi
+              - BMW
+              - BYD
+              - Citroen
+              - CUPRA
+              - Dacia
+              - DS
+              - Fiat
+              - Ford
+              - Hyundai
+              - Jaguar
+              - MG
+              - Mercedes-Benz
+              - MINI
+              - Nissan
+              - SEAT
+              - SKODA
+              - Suzuki
+              - Tesla
+              - Vauxhall
+              - Volkswagen
+      responses:
+        '200':
+          description: Successful response with vehicle listings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VehicleSearchResponse'
+              example:
+                pageNumber: 1
+                pageSize: 32
+                searchResultsCount: 10338
+                vehicleListings:
+                  - vehicleId: "25a29239-5922-4ebc-9aab-91a0831b55fd"
+                    make: "SKODA"
+                    model: "OCTAVIA"
+                    modelYear: 2025
+                    vehicleYear: 2025
+                    price: 26890
+                    thumbnailUrl: "https://eu.cdn.autosonshow.tv/6449/15888/KP25NME/e01_md.jpg"
+                    bodyType: "Estate"
+                    colour: "RED"
+                    doors: 5
+                    seats: 5
+                    fuelType: "Petrol"
+                    transmissionType: "Automatic"
+                    mileage: 4920
+                    driveType: "Front-wheel drive"
+                    variant: "1.5 TSI 150 e-TEC SE L 5dr DSG"
+                    trim: "SE L"
+                    engineCapacityCc: 1498
+                    milesPerGallon: 55
+                    vrm: "KP25NME"
+                    site: "Marshall Skoda Harlow"
+                    priceIncludingAdminFee: 26989
+                    engineSize: 1498
+                    fullRegistration: "KP25NME"
+                    isAvailable: true
+                    published: true
+                    isReserved: false
+                    stockType: "marketplace"
+                    quoteType: "pcp"
+                    quoteAnnualMiles: 8000
+                    quoteBalanceInPence: 2420100
+                    quoteApr: 11.41
+                    quoteRegularPaymentInPence: 42430
+                    quoteTermMonths: 48
+                    quoteDepositInPence: 268900
+                    quoteChargesInPence: 819740
+                    quoteResidualValueInPence: 1202200
+                    quoteExcessMileage: "4p"
+                    isAvailableInStore: false
+                    additionalImages:
+                      - title: "Front driver side"
+                        url: "https://eu.cdn.autosonshow.tv/6449/15888/KP25NME/e01_md.jpg"
+                      - title: "Rear passenger side"
+                        url: "https://eu.cdn.autosonshow.tv/6449/15888/KP25NME/e04_md.jpg"
+                    tags: ["nearly-new"]
+                    discountInPence: 0
+                    depositContributionInPence: 0
+                    promotionId: null
+                    updatedAt: "2025-09-18T10:21:54.000Z"
+                    updatedBy: "FinanceQuoteComponent.PCPQuoteUpdated"
+                    firstPublishedDate: "2025-09-18T10:21:44.414Z"
+                facets:
+                  makes:
+                    - name: "BMW"
+                      doc_count: 684
+                      models:
+                        - name: "1 Series"
+                          doc_count: 148
+                          variants:
+                            - name: "M Sport"
+                              doc_count: 90
+        '400':
+          description: Bad request - Invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: No vehicles found matching the criteria
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    VehicleSearchResponse:
+      type: object
+      required:
+        - pageNumber
+        - pageSize
+        - searchResultsCount
+        - vehicleListings
+      properties:
+        pageNumber:
+          type: integer
+          description: Current page number
+          example: 1
+        pageSize:
+          type: integer
+          description: Number of vehicles per page
+          example: 32
+        searchResultsCount:
+          type: integer
+          description: Total number of vehicles matching the search criteria
+          example: 10338
+        vehicleListings:
+          type: array
+          description: Array of vehicle objects
+          items:
+            $ref: '#/components/schemas/Vehicle'
+        facets:
+          type: object
+          description: Available filter facets
+          properties:
+            makes:
+              type: array
+              items:
+                $ref: '#/components/schemas/MakeFacet'
+
+    Vehicle:
+      type: object
+      required:
+        - vehicleId
+        - make
+        - model
+        - price
+        - modelYear
+        - mileage
+        - fuelType
+        - transmissionType
+        - bodyType
+        - colour
+        - doors
+        - seats
+      properties:
+        vehicleId:
+          type: string
+          format: uuid
+          description: Unique identifier for the vehicle
+          example: "25a29239-5922-4ebc-9aab-91a0831b55fd"
+        make:
+          type: string
+          description: Vehicle manufacturer
+          example: "BMW"
+        model:
+          type: string
+          description: Vehicle model
+          example: "3 Series"
+        modelYear:
+          type: integer
+          description: Model year of the vehicle
+          example: 2022
+        vehicleYear:
+          type: integer
+          description: Registration year of the vehicle
+          example: 2022
+        price:
+          type: integer
+          description: Vehicle price in pounds
+          example: 26890
+        thumbnailUrl:
+          type: string
+          format: uri
+          description: URL to the main vehicle image
+          example: "https://eu.cdn.autosonshow.tv/6449/15888/KP25NME/e01_md.jpg"
+        bodyType:
+          type: string
+          description: Type of vehicle body
+          example: "Estate"
+          enum: ["Estate", "Hatchback", "Saloon", "SUV", "Coupe", "Convertible"]
+        colour:
+          type: string
+          description: Vehicle color
+          example: "RED"
+        doors:
+          type: integer
+          description: Number of doors
+          example: 5
+        seats:
+          type: integer
+          description: Number of seats
+          example: 5
+        fuelType:
+          type: string
+          description: Type of fuel
+          example: "Petrol"
+          enum: ["Petrol", "Diesel", "Electric", "Petrol hybrid", "Petrol plug-in hybrid"]
+        transmissionType:
+          type: string
+          description: Type of transmission
+          example: "Automatic"
+          enum: ["Automatic", "Manual"]
+        mileage:
+          type: integer
+          description: Vehicle mileage
+          example: 4920
+        driveType:
+          type: string
+          description: Drive type
+          example: "Front-wheel drive"
+          enum: ["Front-wheel drive", "Rear-wheel drive", "Four-wheel drive"]
+        variant:
+          type: string
+          description: Specific variant details
+          example: "1.5 TSI 150 e-TEC SE L 5dr DSG"
+        trim:
+          type: string
+          description: Trim level
+          example: "SE L"
+        engineCapacityCc:
+          type: integer
+          description: Engine capacity in cubic centimeters
+          example: 1498
+        milesPerGallon:
+          type: integer
+          description: Fuel efficiency in miles per gallon
+          example: 55
+        rangeInMiles:
+          type: integer
+          description: Electric vehicle range in miles (for EVs only)
+          example: 281
+        vrm:
+          type: string
+          description: Vehicle registration mark
+          example: "KP25NME"
+        site:
+          type: string
+          description: Dealer site location
+          example: "Marshall Skoda Harlow"
+        priceIncludingAdminFee:
+          type: integer
+          description: Price including admin fee
+          example: 26989
+        engineSize:
+          type: integer
+          description: Engine size
+          example: 1498
+        fullRegistration:
+          type: string
+          description: Full registration number
+          example: "KP25NME"
+        isAvailable:
+          type: boolean
+          description: Whether the vehicle is available
+          example: true
+        published:
+          type: boolean
+          description: Whether the listing is published
+          example: true
+        isReserved:
+          type: boolean
+          description: Whether the vehicle is reserved
+          example: false
+        stockType:
+          type: string
+          description: Type of stock
+          example: "marketplace"
+          enum: ["marketplace", "cinch", "partner_sourced"]
+        quoteType:
+          type: string
+          description: Type of finance quote
+          example: "pcp"
+          enum: ["pcp", "hp"]
+        quoteAnnualMiles:
+          type: integer
+          description: Annual mileage for quote
+          example: 8000
+        quoteBalanceInPence:
+          type: integer
+          description: Quote balance in pence
+          example: 2420100
+        quoteApr:
+          type: number
+          format: float
+          description: Annual percentage rate
+          example: 11.41
+        quoteRegularPaymentInPence:
+          type: integer
+          description: Regular payment amount in pence
+          example: 42430
+        quoteTermMonths:
+          type: integer
+          description: Quote term in months
+          example: 48
+        quoteDepositInPence:
+          type: integer
+          description: Deposit amount in pence
+          example: 268900
+        quoteChargesInPence:
+          type: integer
+          description: Total charges in pence
+          example: 819740
+        quoteResidualValueInPence:
+          type: integer
+          description: Residual value in pence
+          example: 1202200
+        quoteExcessMileage:
+          type: string
+          description: Excess mileage charge
+          example: "4p"
+        isAvailableInStore:
+          type: boolean
+          description: Whether available in store
+          example: false
+        additionalImages:
+          type: array
+          description: Additional vehicle images
+          items:
+            $ref: '#/components/schemas/VehicleImage'
+        tags:
+          type: array
+          description: Vehicle tags
+          items:
+            type: string
+          example: ["nearly-new"]
+        discountInPence:
+          type: integer
+          description: Discount amount in pence
+          example: 0
+        depositContributionInPence:
+          type: integer
+          description: Deposit contribution in pence
+          example: 0
+        promotionId:
+          type: string
+          nullable: true
+          description: Promotion identifier
+          example: null
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last updated timestamp
+          example: "2025-09-18T10:21:54.000Z"
+        updatedBy:
+          type: string
+          description: Last updated by
+          example: "FinanceQuoteComponent.PCPQuoteUpdated"
+        firstPublishedDate:
+          type: string
+          format: date-time
+          description: First published date
+          example: "2025-09-18T10:21:44.414Z"
+
+    VehicleImage:
+      type: object
+      required:
+        - title
+        - url
+      properties:
+        title:
+          type: string
+          description: Image title/description
+          example: "Front driver side"
+        url:
+          type: string
+          format: uri
+          description: Image URL
+          example: "https://eu.cdn.autosonshow.tv/6449/15888/KP25NME/e01_md.jpg"
+
+    MakeFacet:
+      type: object
+      required:
+        - name
+        - doc_count
+      properties:
+        name:
+          type: string
+          description: Make name
+          example: "BMW"
+        doc_count:
+          type: integer
+          description: Number of vehicles for this make
+          example: 684
+        models:
+          type: array
+          description: Available models for this make
+          items:
+            $ref: '#/components/schemas/ModelFacet'
+
+    ModelFacet:
+      type: object
+      required:
+        - name
+        - doc_count
+      properties:
+        name:
+          type: string
+          description: Model name
+          example: "1 Series"
+        doc_count:
+          type: integer
+          description: Number of vehicles for this model
+          example: 148
+        variants:
+          type: array
+          description: Available variants for this model
+          items:
+            $ref: '#/components/schemas/VariantFacet'
+
+    VariantFacet:
+      type: object
+      required:
+        - name
+        - doc_count
+      properties:
+        name:
+          type: string
+          description: Variant name
+          example: "M Sport"
+        doc_count:
+          type: integer
+          description: Number of vehicles for this variant
+          example: 90
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error type
+          example: "BadRequest"
+        message:
+          type: string
+          description: Error message
+          example: "Invalid page number"
+        details:
+          type: object
+          description: Additional error details
+          additionalProperties: true
+
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key for authentication (if required)
+
+security:
+  - {} # No security required for this endpoint

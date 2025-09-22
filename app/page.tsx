@@ -1,103 +1,147 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Image from "next/image";
+import VehicleCard from "./components/VehicleCard";
+import { fetchVehicles, Vehicle, ApiResponse } from "./data/vehicles";
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [totalCount, setTotalCount] = useState(0);
+  const [selectedMake, setSelectedMake] = useState<string>('All Makes');
+  const [availableMakes, setAvailableMakes] = useState<string[]>([]);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const loadVehicles = async (make?: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response: ApiResponse = await fetchVehicles(1, 32, make);
+      setVehicles(response.vehicleListings || []);
+      setTotalCount(response.searchResultsCount || 0);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load vehicles');
+      console.error('Error loading vehicles:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadMakes = async () => {
+    try {
+      const response: ApiResponse = await fetchVehicles(1, 1);
+      const data = response as any;
+      if (data.facets && data.facets.makes) {
+        const makes = data.facets.makes.map((make: any) => make.name).sort();
+        setAvailableMakes(['All Makes', ...makes]);
+      }
+    } catch (err) {
+      console.error('Error loading makes:', err);
+    }
+  };
+
+  useEffect(() => {
+    loadVehicles();
+    loadMakes();
+  }, []);
+
+  const handleMakeChange = (make: string) => {
+    setSelectedMake(make);
+    loadVehicles(make === 'All Makes' ? undefined : make);
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center">
+              <Image
+                src="/cinch-logo.png"
+                alt="Cinch Logo"
+                width={120}
+                height={40}
+                className="h-8 w-auto"
+              />
+            </div>
+            <nav className="hidden md:flex space-x-8">
+              <a href="#" className="text-gray-700 hover:text-blue-600 font-medium">Find a car</a>
+              <a href="#" className="text-gray-700 hover:text-blue-600 font-medium">Part exchange</a>
+              <a href="#" className="text-gray-700 hover:text-blue-600 font-medium">Car finance</a>
+              <a href="#" className="text-gray-700 hover:text-blue-600 font-medium">Help</a>
+            </nav>
+          </div>
         </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">All of the essentials sorted</h2>
+          <p className="text-xl text-gray-600 mb-2">The biggest range, free 90-day warranty</p>
+          {totalCount > 0 && (
+            <p className="text-sm text-gray-500">{totalCount.toLocaleString()} cars available</p>
+          )}
+        </div>
+
+        <div className="mb-6">
+          <div className="flex flex-wrap gap-4 items-center">
+            <select 
+              value={selectedMake}
+              onChange={(e) => handleMakeChange(e.target.value)}
+              className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              {availableMakes.map((make) => (
+                <option key={make} value={make}>
+                  {make}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+              <p className="text-red-700">Error loading vehicles: {error}</p>
+            </div>
+          </div>
+        )}
+
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse">
+                <div className="w-full h-48 bg-gray-300"></div>
+                <div className="p-4">
+                  <div className="h-6 bg-gray-300 rounded mb-2"></div>
+                  <div className="h-4 bg-gray-300 rounded w-2/3 mb-3"></div>
+                  <div className="h-3 bg-gray-300 rounded w-full mb-3"></div>
+                  <div className="flex justify-between items-center">
+                    <div className="h-8 bg-gray-300 rounded w-1/2"></div>
+                    <div className="h-10 bg-gray-300 rounded w-24"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {vehicles.map((vehicle) => (
+              <VehicleCard key={vehicle.vehicleId} vehicle={vehicle} />
+            ))}
+          </div>
+        )}
+
+        {!loading && vehicles.length === 0 && !error && (
+          <div className="text-center py-12">
+            <p className="text-gray-500 text-lg">No vehicles found</p>
+          </div>
+        )}
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }
