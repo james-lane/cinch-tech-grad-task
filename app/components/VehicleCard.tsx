@@ -23,11 +23,23 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
 
         <div className="p-4">
           <h3 className="font-semibold text-lg text-gray-900 mb-2">
-            {vehicle.make}
+            {vehicle.modelYear} {vehicle.make} {vehicle.model}
           </h3>
 
-          <p className="text-2xl font-bold text-gray-900">
-            £{vehicle.price.toLocaleString()}
+          <p className="text-gray-900 capitalize mb-3">
+            {`${vehicle.mileage} miles | ${vehicle.colour?.toLowerCase()} | ${
+              vehicle.transmissionType
+            } | ${vehicle.fuelType}`}
+          </p>
+
+          <p className="flex justify-between items-center">
+            <span className="text-2xl font-bold text-gray-900">
+              £{vehicle.price.toLocaleString()}
+            </span>
+
+            <span className="text-xl font-bold text-gray-400">
+              £{vehicle.quoteRegularPaymentInPence / 100} p/m
+            </span>
           </p>
         </div>
       </div>

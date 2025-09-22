@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
-import VehicleCard from "./components/VehicleCard";
-import { fetchVehicles, Vehicle, ApiResponse } from "./data/vehicles";
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import VehicleCard from './components/VehicleCard';
+import { fetchVehicles, Vehicle, ApiResponse } from './data/vehicles';
 
 export default function Home() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -12,6 +12,7 @@ export default function Home() {
   const [totalCount, setTotalCount] = useState(0);
   const [selectedMake, setSelectedMake] = useState<string>('All Makes');
   const [availableMakes, setAvailableMakes] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<string>('default');
 
   const loadVehicles = async (make?: string) => {
     try {
@@ -46,9 +47,48 @@ export default function Home() {
     loadMakes();
   }, []);
 
+  const sortVehicles = (
+    vehicleList: Vehicle[],
+    sortOption: string
+  ): Vehicle[] => {
+    const sorted = [...vehicleList];
+    switch (sortOption) {
+      case 'price-low':
+        return sorted.sort((a, b) => a.price - b.price);
+      case 'price-high':
+        return sorted.sort((a, b) => b.price - a.price);
+      case 'monthly-price-low':
+        return sorted.sort(
+          (a, b) => a.quoteRegularPaymentInPence - b.quoteRegularPaymentInPence
+        );
+      case 'monthly-price-high':
+        return sorted.sort(
+          (a, b) => b.quoteRegularPaymentInPence - a.quoteRegularPaymentInPence
+        );
+      case 'mileage-low':
+        return sorted.sort((a, b) => (a.mileage || 0) - (b.mileage || 0));
+      case 'year-new':
+        return sorted.sort(
+          (a, b) => (b.vehicleYear || 0) - (a.vehicleYear || 0)
+        );
+      case 'year-old':
+        return sorted.sort(
+          (a, b) => (a.vehicleYear || 0) - (b.vehicleYear || 0)
+        );
+      default:
+        return sorted;
+    }
+  };
+
   const handleMakeChange = (make: string) => {
     setSelectedMake(make);
     loadVehicles(make === 'All Makes' ? undefined : make);
+  };
+
+  const handleSortChange = (sortOption: string) => {
+    setSortBy(sortOption);
+    const sortedVehicles = sortVehicles(vehicles, sortOption);
+    setVehicles(sortedVehicles);
   };
 
   return (
@@ -66,10 +106,30 @@ export default function Home() {
               />
             </div>
             <nav className="hidden md:flex space-x-8">
-              <a href="#" className="text-gray-700 hover:text-blue-600 font-medium">Find a car</a>
-              <a href="#" className="text-gray-700 hover:text-blue-600 font-medium">Part exchange</a>
-              <a href="#" className="text-gray-700 hover:text-blue-600 font-medium">Car finance</a>
-              <a href="#" className="text-gray-700 hover:text-blue-600 font-medium">Help</a>
+              <a
+                href="#"
+                className="text-gray-700 hover:text-blue-600 font-medium"
+              >
+                Find a car
+              </a>
+              <a
+                href="#"
+                className="text-gray-700 hover:text-blue-600 font-medium"
+              >
+                Part exchange
+              </a>
+              <a
+                href="#"
+                className="text-gray-700 hover:text-blue-600 font-medium"
+              >
+                Car finance
+              </a>
+              <a
+                href="#"
+                className="text-gray-700 hover:text-blue-600 font-medium"
+              >
+                Help
+              </a>
             </nav>
           </div>
         </div>
@@ -77,16 +137,22 @@ export default function Home() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">All of the essentials sorted</h2>
-          <p className="text-xl text-gray-600 mb-2">The biggest range, free 90-day warranty</p>
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            All of the essentials sorted
+          </h2>
+          <p className="text-xl text-gray-600 mb-2">
+            The biggest range, free 90-day warranty
+          </p>
           {totalCount > 0 && (
-            <p className="text-sm text-gray-500">{totalCount.toLocaleString()} cars available</p>
+            <p className="text-sm text-gray-500">
+              {totalCount.toLocaleString()} cars available
+            </p>
           )}
         </div>
 
         <div className="mb-6">
           <div className="flex flex-wrap gap-4 items-center">
-            <select 
+            <select
               value={selectedMake}
               onChange={(e) => handleMakeChange(e.target.value)}
               className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -97,14 +163,41 @@ export default function Home() {
                 </option>
               ))}
             </select>
+
+            <select
+              value={sortBy}
+              onChange={(e) => handleSortChange(e.target.value)}
+              className="border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="default">Sort by</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+              <option value="monthly-price-low">
+                Monthly Price: Low to High
+              </option>
+              <option value="monthly-price-high">
+                Monthly Price: High to Low
+              </option>
+              <option value="mileage-low">Mileage: Low to High</option>
+              <option value="year-new">Year: Newest First</option>
+              <option value="year-old">Year: Oldest First</option>
+            </select>
           </div>
         </div>
 
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
             <div className="flex items-center">
-              <svg className="w-5 h-5 text-red-400 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              <svg
+                className="w-5 h-5 text-red-400 mr-2"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
               </svg>
               <p className="text-red-700">Error loading vehicles: {error}</p>
             </div>
@@ -114,7 +207,10 @@ export default function Home() {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {Array.from({ length: 8 }).map((_, index) => (
-              <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse">
+              <div
+                key={index}
+                className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse"
+              >
                 <div className="w-full h-48 bg-gray-300"></div>
                 <div className="p-4">
                   <div className="h-6 bg-gray-300 rounded mb-2"></div>
