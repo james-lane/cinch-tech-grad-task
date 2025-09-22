@@ -38,7 +38,7 @@ export default function VehicleCard({ vehicle }: VehicleCardProps) {
             </span>
 
             <span className="text-xl font-bold text-gray-400">
-              £{vehicle.quoteRegularPaymentInPence / 100} p/m
+              £{vehicle.quoteRegularPaymentInPence! / 100} p/m
             </span>
           </p>
         </div>

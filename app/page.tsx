@@ -59,11 +59,13 @@ export default function Home() {
         return sorted.sort((a, b) => b.price - a.price);
       case 'monthly-price-low':
         return sorted.sort(
-          (a, b) => a.quoteRegularPaymentInPence - b.quoteRegularPaymentInPence
+          (a, b) =>
+            a.quoteRegularPaymentInPence! - b.quoteRegularPaymentInPence!
         );
       case 'monthly-price-high':
         return sorted.sort(
-          (a, b) => b.quoteRegularPaymentInPence - a.quoteRegularPaymentInPence
+          (a, b) =>
+            b.quoteRegularPaymentInPence! - a.quoteRegularPaymentInPence!
         );
       case 'mileage-low':
         return sorted.sort((a, b) => (a.mileage || 0) - (b.mileage || 0));
