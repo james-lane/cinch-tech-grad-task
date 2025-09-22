@@ -19,3 +19,7 @@ Tools of choice: Miro
 Time to get into the code. Our ideas are solid and we have a plan that the business have agreed to. Let's get into the code and make it a reality.
 
 Tools of choice: Browser, VS Code, Github
+
+### Deployment
+
+The project will automatically deploy to [Vercel](https://cinch-tech-grad-task.vercel.app/) when changes are pushed to main.
